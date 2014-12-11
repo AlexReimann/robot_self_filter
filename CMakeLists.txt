@@ -1,24 +1,11 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(robot_self_filter)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-find_package(Eigen REQUIRED)
+find_package(catkin REQUIRED COMPONENTS cmake_modules roscpp tf tf_conversions filters sensor_msgs visualization_msgs geometric_shapes urdf resource_retriever pcl_conversions  shape_msgs  )
+find_package(Boost REQUIRED COMPONENTS signals)
 find_package(PCL REQUIRED)
-include_directories(SYSTEM ${EIGEN_INCLUDE_DIRS}
-                           ${PCL_INCLUDE_DIRS}
-)
-
-set(ROS_BUILD_TYPE Release)
-
-find_package(PCL)
-include_directories(SYSTEM ${PCL_INCLUDE_DIRS})
+find_package(Eigen REQUIRED)
+find_package(OpenMP REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(ASSIMP QUIET)
 if (NOT ASSIMP_FOUND)
@@ -35,7 +22,7 @@ if (ASSIMP_FOUND)
   include_directories(${ASSIMP_INCLUDE_DIRS})
   link_directories(${ASSIMP_LIBRARY_DIRS})
 else()
-  message(STATUS "could not find assimp (perhaps available thorugh ROS package?), so assimping assimp v2")
+  message(STATUS "could not find assimp (perhaps available thorugh ROS package?), so assuming assimp v2")
   set(ASSIMP_LIBRARIES assimp)
   set(ASSIMP_LIBRARY_DIRS)
   set(ASSIMP_CXX_FLAGS)
@@ -45,25 +32,50 @@ else()
   set(IS_ASSIMP3 0) # most likely not
 endif()
 
-rosbuild_init()
 
-rosbuild_add_boost_directories()
-
-rosbuild_add_library(robot_self_filter src/self_mask.cpp)
-rosbuild_add_openmp_flags(robot_self_filter)
-target_link_libraries(robot_self_filter assimp
-                                        geometric_shapes
-                                        ${PCL_LIBRARIES}
+## Declare things to be passed to other projects
+catkin_package(
+    INCLUDE_DIRS   include
+    LIBRARIES      ${PROJECT_NAME}
+    CATKIN_DEPENDS roscpp tf tf_conversions filters sensor_msgs visualization_msgs geometric_shapes urdf resource_retriever pcl_conversions  shape_msgs
+    DEPENDS        pcl assimp
 )
 
-rosbuild_add_executable (test_filter src/test_filter.cpp)
-rosbuild_add_openmp_flags (test_filter)
-target_link_libraries (test_filter robot_self_filter assimp)
+include_directories(include SYSTEM ${EIGEN_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
-rosbuild_add_executable(self_filter src/self_filter.cpp)
-rosbuild_add_openmp_flags(self_filter)
-target_link_libraries(self_filter assimp
-                                  geometric_shapes
-                                  robot_self_filter
+set(HEADERS
+    include/${PROJECT_NAME}/self_mask.h
+    include/${PROJECT_NAME}/self_see_filter.h
 )
-rosbuild_link_boost(self_filter signals)
+
+set(SOURCES
+    src/self_filter.cpp
+    src/self_mask.cpp
+    src/self_filter.cpp
+)
+
+#common commands for building c++ executables and libraries
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+target_link_libraries(${PROJECT_NAME} ${PCL_LIBRARIES} ${catkin_LIBRARIES} assimp ${Boost_LIBRARIES})
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+
+add_executable(test_filter src/test_filter.cpp ${HEADERS})
+target_link_libraries(test_filter ${PROJECT_NAME})
+add_dependencies(test_filter ${catkin_EXPORTED_TARGETS} )
+
+add_executable(self_filter src/self_filter.cpp ${HEADERS})
+target_link_libraries(self_filter ${PROJECT_NAME})
+add_dependencies(self_filter ${catkin_EXPORTED_TARGETS} )
+
+
+install(TARGETS ${PROJECT_NAME} self_filter
+   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+#install the launch files.
+install(DIRECTORY .
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  FILES_MATCHING PATTERN "*.launch"
+
+)
