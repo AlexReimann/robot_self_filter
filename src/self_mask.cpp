@@ -155,8 +155,8 @@ bool robot_self_filter::SelfMask::configure(const std::vector<LinkInfo> &links)
       missing << " " << links[i].name;
       continue;
     }
-    ROS_INFO("Name '%s'", links[i].name.c_str());
-    ROS_INFO("Size: '%d'", link->collision_array.size());
+    //ROS_INFO("Name '%s'", links[i].name.c_str());
+    //ROS_INFO("Size: '%d'", link->collision_array.size());
 
     
     if (!(link->collision && link->collision->geometry))
@@ -168,7 +168,6 @@ bool robot_self_filter::SelfMask::configure(const std::vector<LinkInfo> &links)
     for (size_t j = 0; j < link->collision_array.size(); ++j){
 
       shapes::Shape *shape = constructShape(link->collision_array[j]->geometry.get());
-
 
       if (!shape)
       {
