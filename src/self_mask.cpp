@@ -165,9 +165,9 @@ bool robot_self_filter::SelfMask::configure(const std::vector<LinkInfo> &links)
         continue;
     }
     
-    for (size_t i = 0; i < link->collision_array.size(); ++i){
+    for (size_t j = 0; j < link->collision_array.size(); ++j){
 
-      shapes::Shape *shape = constructShape(link->collision_array[i]->geometry.get());
+      shapes::Shape *shape = constructShape(link->collision_array[j]->geometry.get());
 
 
       if (!shape)
@@ -185,7 +185,7 @@ bool robot_self_filter::SelfMask::configure(const std::vector<LinkInfo> &links)
 
         // collision models may have an offset, in addition to what TF gives
         // so we keep it around
-        sl.constTransf = urdfPose2EigenTransform(link->collision_array[i]->origin);
+        sl.constTransf = urdfPose2EigenTransform(link->collision_array[j]->origin);
 
         sl.body->setScale(links[i].scale);
         sl.body->setPadding(links[i].padding);
