@@ -155,6 +155,9 @@ bool robot_self_filter::SelfMask::configure(const std::vector<LinkInfo> &links)
       missing << " " << links[i].name;
       continue;
     }
+    ROS_INFO("Name '%s'", links[i].name.c_str());
+    ROS_INFO("Size: '%d'", link->collision_array.size());
+
     
     if (!(link->collision && link->collision->geometry))
     {
@@ -162,36 +165,40 @@ bool robot_self_filter::SelfMask::configure(const std::vector<LinkInfo> &links)
         continue;
     }
     
-    shapes::Shape *shape = constructShape(link->collision->geometry.get());
-    
-    if (!shape)
-    {
+    for (size_t i = 0; i < link->collision_array.size(); ++i){
+
+      shapes::Shape *shape = constructShape(link->collision_array[i]->geometry.get());
+
+
+      if (!shape)
+      {
         ROS_ERROR("Unable to construct collision shape for link '%s'", links[i].name.c_str());
         continue;
-    }
-	
-    SeeLink sl;
-    sl.body = bodies::createBodyFromShape(shape);
+      }
 
-    if (sl.body)
-    {
-      sl.name = links[i].name;
-      
-      // collision models may have an offset, in addition to what TF gives
-      // so we keep it around
-      sl.constTransf = urdfPose2EigenTransform(link->collision->origin);
+      SeeLink sl;
+      sl.body = bodies::createBodyFromShape(shape);
 
-      sl.body->setScale(links[i].scale);
-      sl.body->setPadding(links[i].padding);
-            ROS_DEBUG_STREAM("Self see link name " <<  links[i].name << " padding " << links[i].padding);
-      sl.volume = sl.body->computeVolume();
-      sl.unscaledBody = bodies::createBodyFromShape(shape);
-      bodies_.push_back(sl);
+      if (sl.body)
+      {
+        sl.name = links[i].name;
+
+        // collision models may have an offset, in addition to what TF gives
+        // so we keep it around
+        sl.constTransf = urdfPose2EigenTransform(link->collision_array[i]->origin);
+
+        sl.body->setScale(links[i].scale);
+        sl.body->setPadding(links[i].padding);
+        ROS_DEBUG_STREAM("Self see link name " <<  links[i].name << " padding " << links[i].padding);
+        sl.volume = sl.body->computeVolume();
+        sl.unscaledBody = bodies::createBodyFromShape(shape);
+        bodies_.push_back(sl);
+      }
+      else
+        ROS_WARN("Unable to create point inclusion body for link '%s'", links[i].name.c_str());
+
+      delete shape;
     }
-    else
-      ROS_WARN("Unable to create point inclusion body for link '%s'", links[i].name.c_str());
-    
-    delete shape;
   }
     
   if (missing.str().size() > 0)
