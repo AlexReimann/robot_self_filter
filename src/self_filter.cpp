@@ -48,7 +48,7 @@ class SelfFilter
     SelfFilter (void): nh_ ("~")
     {
       nh_.param<std::string> ("sensor_frame", sensor_frame_, std::string ());
-      nh_.param<double> ("subsample_value", subsample_param_, 0.01);
+      nh_.param<double> ("subsample_value", subsample_param_, 0.0);
       self_filter_ = new filters::SelfFilter<pcl::PointCloud<pcl::PointXYZI> > (nh_);
 
       sub_ = new message_filters::Subscriber<sensor_msgs::PointCloud2> (root_handle_, "cloud_in", 10);	
