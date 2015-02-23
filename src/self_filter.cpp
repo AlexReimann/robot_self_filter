@@ -95,7 +95,7 @@ class SelfFilter
       pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>), cloud_filtered(new pcl::PointCloud<pcl::PointXYZI>);
       pcl::fromROSMsg (*cloud2, *cloud);
 
-      if (subsample_param_ != 0)
+      if (subsample_param_ != 0.0)
       {
         pcl::PointCloud<pcl::PointXYZI> cloud_downsampled;
         // Set up the downsampling filter
