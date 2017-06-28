@@ -114,7 +114,7 @@ namespace filters
             }
           }
         }
-        sm_ = new robot_self_filter::SelfMask (tf_, links);
+        sm_ = new robot_self_filter::SelfMask<T> (tf_, links);
 //        nh_.param<std::string> ("annotate", annotate_, std::string ());
 //        if (!annotate_.empty ())
 //          ROS_INFO ("Self filter is adding annotation channel '%s'", annotate_.c_str ());
@@ -148,15 +148,25 @@ namespace filters
         sensor_frame_ = sensor_frame;
         return (update (data_in, data_out));
       }
+
+      bool updateWithSensorFrameAndMask
+        (const T& data_in, T& data_out, const std::string& sensor_frame, std::vector<int>& keep = std::vector<int>())
+      {
+        sensor_frame_ = sensor_frame;
+        return (updateWithMask (data_in, data_out, keep));
+      }
         
       /** \brief Update the filter and return the data seperately
        * \param data_in T array with length width
        * \param data_out T array with length width
        */
-      virtual bool 
-        update (const T& data_in, T& data_out)
+      bool
+        updateWithMask (const T& data_in, T& data_out, std::vector<int>& keep = std::vector<int>())
       {
-        std::vector<int> keep (data_in.points.size ());
+        //std::vector<int> keep (data_in.points.size ());
+        keep.clear();
+        keep.resize(data_in.size());
+
         if (sensor_frame_.empty ()) 
         {
           sm_->maskContainment (data_in, keep);
@@ -168,6 +178,18 @@ namespace filters
         fillResult (data_in, keep, data_out);
         return (true);
       }
+
+      /** \brief Update the filter and return the data seperately
+       * \param data_in T array with length width
+       * \param data_out T array with length width
+       */
+      virtual bool
+        update (const T& data_in, T& data_out)
+      {
+        std::vector<int> keep (data_in.points.size ());
+        return updateWithMask(data_in, data_out, keep);
+      }
+
 
       bool updateWithSensorFrame (const T& data_in, T& data_out, T& data_diff, const std::string& sensor_frame)
       {
@@ -305,7 +327,7 @@ namespace filters
         return true;
       }*/
 
-      robot_self_filter::SelfMask* getSelfMask () 
+      robot_self_filter::SelfMask<T>* getSelfMask () 
       {
         return (sm_);
       }
@@ -318,7 +340,7 @@ namespace filters
     protected:
         
       tf::TransformListener tf_;
-      robot_self_filter::SelfMask* sm_;
+      robot_self_filter::SelfMask<T>* sm_;
       
       ros::NodeHandle nh_;
       bool invert_;

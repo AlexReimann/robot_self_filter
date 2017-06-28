@@ -57,7 +57,7 @@ public:
         li.padding = .05;
         li.scale = 1.0;
         links.push_back(li);
-	sf_ = new robot_self_filter::SelfMask(tf_, links);
+	sf_ = new robot_self_filter::SelfMask<pcl::PointCloud<pcl::PointXYZI> >(tf_, links);
     }
 
     ~TestSelfFilter(void)
@@ -154,7 +154,7 @@ protected:
     }
 
     tf::TransformListener             tf_;
-    robot_self_filter::SelfMask      *sf_;
+    robot_self_filter::SelfMask<pcl::PointCloud<pcl::PointXYZI> >      *sf_;
     ros::Publisher                    vmPub_;
     ros::NodeHandle                   nodeHandle_;        
     int                               id_;

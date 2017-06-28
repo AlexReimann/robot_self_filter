@@ -52,7 +52,7 @@ set(HEADERS
 
 set(SOURCES
     src/self_filter.cpp
-    src/self_mask.cpp
+    #src/self_mask.cpp
     src/self_filter.cpp
 )
 
