@@ -41,6 +41,8 @@
 #include <message_filters/subscriber.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/shadowpoints.h>
+
 
 class SelfFilter
 {
@@ -92,8 +94,29 @@ class SelfFilter
       std::vector<int> mask;
       ros::WallTime tm = ros::WallTime::now ();
 
+      pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_unfiltered(new pcl::PointCloud<pcl::PointXYZI>);
       pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>), cloud_filtered(new pcl::PointCloud<pcl::PointXYZI>);
-      pcl::fromROSMsg (*cloud2, *cloud);
+      pcl::fromROSMsg (*cloud2, *cloud_unfiltered);
+
+      float high_intensity_threshold_distance = 1.5;
+      float high_intensity_threshold_distance_squared = high_intensity_threshold_distance * high_intensity_threshold_distance;
+      float min_close_intensity = 50;
+
+      cloud->header = cloud_unfiltered->header;
+
+      int removal_count = 0;
+
+      for (size_t i = 0; i < cloud_unfiltered->size(); ++i)
+      {
+        const pcl::PointXYZI& point = (*cloud_unfiltered)[i];
+
+        if (((point.x * point.x + point.y * point.y + point.z *point.z) > high_intensity_threshold_distance_squared) || point.intensity > min_close_intensity){
+          cloud->push_back(point);
+        }else{
+          removal_count++;
+        }
+      }
+      ROS_INFO ("Removed %d points.", removal_count);
 
       if (subsample_param_ != 0.0)
       {
