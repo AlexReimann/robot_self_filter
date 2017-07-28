@@ -116,7 +116,7 @@ class SelfFilter
           removal_count++;
         }
       }
-      ROS_INFO ("Removed %d points.", removal_count);
+      ROS_DEBUG ("Self filter removed %d points.", removal_count);
 
       if (subsample_param_ != 0.0)
       {
