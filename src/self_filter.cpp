@@ -98,7 +98,7 @@ class SelfFilter
       pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>), cloud_filtered(new pcl::PointCloud<pcl::PointXYZI>);
       pcl::fromROSMsg (*cloud2, *cloud_unfiltered);
 
-      float high_intensity_threshold_distance = 0.5;
+      float high_intensity_threshold_distance = 0.3;
       float high_intensity_threshold_distance_squared = high_intensity_threshold_distance * high_intensity_threshold_distance;
       float min_close_intensity = 50;
 
