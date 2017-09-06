@@ -52,8 +52,9 @@ set(HEADERS
 
 set(SOURCES
     src/self_filter.cpp
+    #src/self_filter_nodelet.cpp
     #src/self_mask.cpp
-    src/self_filter.cpp
+    
 )
 
 #common commands for building c++ executables and libraries
@@ -65,7 +66,7 @@ add_executable(test_filter src/test_filter.cpp ${HEADERS})
 target_link_libraries(test_filter ${PROJECT_NAME})
 add_dependencies(test_filter ${catkin_EXPORTED_TARGETS} )
 
-add_executable(self_filter src/self_filter.cpp ${HEADERS})
+add_executable(self_filter src/self_filter_node.cpp ${HEADERS})
 target_link_libraries(self_filter ${PROJECT_NAME})
 add_dependencies(self_filter ${catkin_EXPORTED_TARGETS} )
 

@@ -34,20 +34,9 @@
 
 /** \author Ioan Sucan */
 
-#include <ros/ros.h>
-#include <sstream>
-#include "robot_self_filter/self_see_filter.h"
-#include <tf/message_filter.h>
-#include <message_filters/subscriber.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/filters/voxel_grid.h>
-#include <pcl/filters/shadowpoints.h>
+#include "robot_self_filter/self_filter.h"
 
-
-class SelfFilter
-{
-  public:
-    SelfFilter (void): nh_ ("~")
+    SelfFilter::SelfFilter (void): nh_ ("~")
     {
       nh_.param<std::string> ("sensor_frame", sensor_frame_, std::string ());
       nh_.param<double> ("subsample_value", subsample_param_, 0.0);
@@ -73,50 +62,28 @@ class SelfFilter
       }
     }
       
-    ~SelfFilter (void)
+    SelfFilter::~SelfFilter (void)
     {
       delete self_filter_;
       delete mn_;
       delete sub_;
     }
       
-  private:
     void 
-      noFilterCallback (const sensor_msgs::PointCloud2ConstPtr &cloud)
+      SelfFilter::noFilterCallback (const sensor_msgs::PointCloud2ConstPtr &cloud)
     {
       pointCloudPublisher_.publish (cloud);
       ROS_DEBUG ("Self filter publishing unfiltered frame");
     }
       
-    void cloudCallback (const sensor_msgs::PointCloud2ConstPtr &cloud2)
+    void SelfFilter::cloudCallback (const sensor_msgs::PointCloud2ConstPtr &cloud2)
     {
       ROS_DEBUG ("Got pointcloud that is %f seconds old", (ros::Time::now() - cloud2->header.stamp).toSec ());
       std::vector<int> mask;
       ros::WallTime tm = ros::WallTime::now ();
 
-      pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_unfiltered(new pcl::PointCloud<pcl::PointXYZI>);
       pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>), cloud_filtered(new pcl::PointCloud<pcl::PointXYZI>);
-      pcl::fromROSMsg (*cloud2, *cloud_unfiltered);
-
-      float high_intensity_threshold_distance = 0.3;
-      float high_intensity_threshold_distance_squared = high_intensity_threshold_distance * high_intensity_threshold_distance;
-      float min_close_intensity = 50;
-
-      cloud->header = cloud_unfiltered->header;
-
-      int removal_count = 0;
-
-      for (size_t i = 0; i < cloud_unfiltered->size(); ++i)
-      {
-        const pcl::PointXYZI& point = (*cloud_unfiltered)[i];
-
-        if (((point.x * point.x + point.y * point.y + point.z *point.z) > high_intensity_threshold_distance_squared) || (point.intensity > min_close_intensity)){
-          cloud->push_back(point);
-        }else{
-          removal_count++;
-        }
-      }
-      ROS_DEBUG ("Self filter removed %d points.", removal_count);
+      pcl::fromROSMsg (*cloud2, *cloud);
 
       if (subsample_param_ != 0.0)
       {
@@ -142,30 +109,3 @@ class SelfFilter
       pointCloudPublisher_.publish (out);
     }
 
-    tf::TransformListener                                 tf_;
-    //tf::MessageNotifier<sensor_msgs::PointCloud>           *mn_;
-    ros::NodeHandle                                       nh_, root_handle_;
-
-    tf::MessageFilter<sensor_msgs::PointCloud2>           *mn_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> *sub_;
-
-    filters::SelfFilter<pcl::PointCloud<pcl::PointXYZI> > *self_filter_;
-    std::string sensor_frame_;
-    double subsample_param_;
-
-    ros::Publisher                                        pointCloudPublisher_;
-    ros::Subscriber                                       no_filter_sub_;
-
-    pcl::VoxelGrid<pcl::PointXYZI>                         grid_;
-};
-
-int 
-  main (int argc, char **argv)
-{
-  ros::init (argc, argv, "self_filter");
-
-  SelfFilter s;
-  ros::spin ();
-    
-  return (0);
-}
