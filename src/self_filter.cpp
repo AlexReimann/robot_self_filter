@@ -36,23 +36,23 @@
 
 #include "robot_self_filter/self_filter.h"
 
-    SelfFilter::SelfFilter (void): nh_ ("~")
+    SelfFilter::SelfFilter (ros::NodeHandle& nh_,ros::NodeHandle& pnh_)
     {
-      nh_.param<std::string> ("sensor_frame", sensor_frame_, std::string ());
-      nh_.param<double> ("subsample_value", subsample_param_, 0.0);
-      self_filter_ = new filters::SelfFilter<pcl::PointCloud<pcl::PointXYZI> > (nh_);
+      pnh_.param<std::string> ("sensor_frame", sensor_frame_, std::string ());
+      pnh_.param<double> ("subsample_value", subsample_param_, 0.0);
+      self_filter_ = new filters::SelfFilter<pcl::PointCloud<pcl::PointXYZI> > (pnh_);
 
-      sub_ = new message_filters::Subscriber<sensor_msgs::PointCloud2> (root_handle_, "cloud_in", 10);	
+      sub_ = new message_filters::Subscriber<sensor_msgs::PointCloud2> (nh_, "cloud_in", 10);	
       mn_ = new tf::MessageFilter<sensor_msgs::PointCloud2> (*sub_, tf_, "", 30);
 
       //mn_ = new tf::MessageNotifier<sensor_msgs::PointCloud2>(tf_, boost::bind(&SelfFilter::cloudCallback, this, _1), "cloud_in", "", 1);
-      pointCloudPublisher_ = root_handle_.advertise<sensor_msgs::PointCloud2>("cloud_out", 10);
+      pointCloudPublisher_ = nh_.advertise<sensor_msgs::PointCloud2>("cloud_out", 10);
       std::vector<std::string> frames;
       self_filter_->getSelfMask()->getLinkNames(frames);
       if (frames.empty())
       {
         ROS_DEBUG ("No valid frames have been passed into the self filter. Using a callback that will just forward scans on.");
-        no_filter_sub_ = root_handle_.subscribe<sensor_msgs::PointCloud2> ("cloud_in", 1, boost::bind(&SelfFilter::noFilterCallback, this, _1));
+        no_filter_sub_ = nh_.subscribe<sensor_msgs::PointCloud2> ("cloud_in", 1, boost::bind(&SelfFilter::noFilterCallback, this, _1));
       }
       else
       {

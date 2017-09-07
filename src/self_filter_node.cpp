@@ -41,7 +41,10 @@ int
 {
   ros::init (argc, argv, "self_filter");
 
-  SelfFilter s;
+  ros::NodeHandle nh_("");
+  ros::NodeHandle pnh_("~");
+  
+  SelfFilter s(nh_, pnh_);
   ros::spin ();
     
   return (0);

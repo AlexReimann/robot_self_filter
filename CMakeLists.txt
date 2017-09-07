@@ -3,7 +3,7 @@ project(robot_self_filter)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
-find_package(catkin REQUIRED COMPONENTS cmake_modules roscpp tf tf_conversions filters sensor_msgs visualization_msgs geometric_shapes urdf resource_retriever pcl_conversions  shape_msgs  )
+find_package(catkin REQUIRED COMPONENTS cmake_modules roscpp tf tf_conversions filters sensor_msgs visualization_msgs geometric_shapes urdf resource_retriever pcl_conversions  shape_msgs nodelet )
 find_package(Boost REQUIRED COMPONENTS signals)
 find_package(PCL REQUIRED)
 find_package(Eigen REQUIRED)
@@ -39,7 +39,7 @@ endif()
 catkin_package(
     INCLUDE_DIRS   include
     LIBRARIES      ${PROJECT_NAME}
-    CATKIN_DEPENDS roscpp tf tf_conversions filters sensor_msgs visualization_msgs geometric_shapes urdf resource_retriever pcl_conversions  shape_msgs
+    CATKIN_DEPENDS roscpp tf tf_conversions filters sensor_msgs visualization_msgs geometric_shapes urdf resource_retriever pcl_conversions  shape_msgs nodelet
     DEPENDS        pcl assimp
 )
 
@@ -52,7 +52,7 @@ set(HEADERS
 
 set(SOURCES
     src/self_filter.cpp
-    #src/self_filter_nodelet.cpp
+    src/self_filter_nodelet.cpp
     #src/self_mask.cpp
     
 )

@@ -48,7 +48,7 @@
 class SelfFilter
 {
   public:
-    SelfFilter (void);      
+    SelfFilter (ros::NodeHandle& nh_,ros::NodeHandle& pnh_);    
     ~SelfFilter (void);
       
   private:
@@ -58,7 +58,7 @@ class SelfFilter
 
     tf::TransformListener                                 tf_;
     //tf::MessageNotifier<sensor_msgs::PointCloud>           *mn_;
-    ros::NodeHandle                                       nh_, root_handle_;
+    //ros::NodeHandle                                       nh_, root_handle_;
 
     tf::MessageFilter<sensor_msgs::PointCloud2>           *mn_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> *sub_;
