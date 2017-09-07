@@ -79,7 +79,7 @@
     void SelfFilter::cloudCallback (const sensor_msgs::PointCloud2ConstPtr &cloud2)
     {
       ROS_DEBUG ("Got pointcloud that is %f seconds old", (ros::Time::now() - cloud2->header.stamp).toSec ());
-      std::vector<int> mask;
+      //std::vector<int> mask;
       ros::WallTime tm = ros::WallTime::now ();
 
       pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>), cloud_filtered(new pcl::PointCloud<pcl::PointXYZI>);
@@ -104,8 +104,8 @@
 
       ROS_DEBUG ("Self filter: reduced %d points to %d points in %f seconds", (int)cloud->points.size(), (int)cloud_filtered->points.size (), sec);
 
-      pcl::PCLPointCloud2 out;
-      pcl::toPCLPointCloud2(*cloud_filtered, out);
-      pointCloudPublisher_.publish (out);
+      sensor_msgs::PointCloud2Ptr cloud2_out = boost::make_shared<sensor_msgs::PointCloud2>();
+      pcl::toROSMsg(*cloud_filtered, *cloud2_out);
+      pointCloudPublisher_.publish(cloud2_out);
     }
 
