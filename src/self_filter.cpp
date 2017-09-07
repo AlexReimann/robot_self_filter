@@ -100,9 +100,9 @@
         self_filter_->updateWithSensorFrame (*cloud, *cloud_filtered, sensor_frame_);
       }      
 
-      double sec = (ros::WallTime::now() - tm).toSec ();
+      //double sec = (ros::WallTime::now() - tm).toSec ();
 
-      ROS_DEBUG ("Self filter: reduced %d points to %d points in %f seconds", (int)cloud->points.size(), (int)cloud_filtered->points.size (), sec);
+      ROS_DEBUG ("Self filter: reduced %d points to %d points in %f seconds", (int)cloud->points.size(), (int)cloud_filtered->points.size (), (ros::WallTime::now() - tm).toSec ());
 
       sensor_msgs::PointCloud2Ptr cloud2_out = boost::make_shared<sensor_msgs::PointCloud2>();
       pcl::toROSMsg(*cloud_filtered, *cloud2_out);

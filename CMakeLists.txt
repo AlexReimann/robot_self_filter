@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 find_package(catkin REQUIRED COMPONENTS cmake_modules roscpp tf tf_conversions filters sensor_msgs visualization_msgs geometric_shapes urdf resource_retriever pcl_conversions  shape_msgs nodelet )
 find_package(Boost REQUIRED COMPONENTS signals)
 find_package(PCL REQUIRED)
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(ASSIMP QUIET)
@@ -40,7 +40,7 @@ catkin_package(
     INCLUDE_DIRS   include
     LIBRARIES      ${PROJECT_NAME}
     CATKIN_DEPENDS roscpp tf tf_conversions filters sensor_msgs visualization_msgs geometric_shapes urdf resource_retriever pcl_conversions  shape_msgs nodelet
-    DEPENDS        pcl assimp
+    #DEPENDS        pcl assimp
 )
 
 include_directories(include SYSTEM ${EIGEN_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
