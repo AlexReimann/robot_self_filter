@@ -163,7 +163,9 @@ namespace robot_self_filter
     public:
         
         /** \brief Construct the filter */
-        SelfMask(tf::TransformListener &tf, const std::vector<LinkInfo> &links) : tf_(tf)
+        SelfMask(tf::TransformListener &tf, const std::vector<LinkInfo> &links, ros::NodeHandle nh)
+        : tf_(tf)
+        , nh_(nh)
         {
             configure (links);
         }
@@ -413,7 +415,12 @@ namespace robot_self_filter
             std::string content;
             boost::shared_ptr<urdf::Model> urdfModel;
             
-            if (nh_.getParam("robot_description", content))
+            //Workaround because remapping doesn't appear to work with nodelets
+            //std::string robot_description_param_name;
+            //nh_.param("robot_description_param_name", robot_description_param_name, std::string("robot_description"));
+            //ROS_INFO("Using robot_description param name: %s", (nh_.getNamespace() + robot_description_param_name).c_str());
+            
+            if (nh_.getParam("/robot_description", content))
             {
                 urdfModel = boost::shared_ptr<urdf::Model>(new urdf::Model());
                 if (!urdfModel->initString(content))
@@ -474,7 +481,7 @@ namespace robot_self_filter
                         
                         sl.body->setScale(links[i].scale);
                         sl.body->setPadding(links[i].padding);
-                        ROS_DEBUG_STREAM("Self see link name " <<  links[i].name << " padding " << links[i].padding);
+                        ROS_INFO_STREAM("Self see link name " <<  links[i].name << " padding " << links[i].padding);
                         sl.volume = sl.body->computeVolume();
                         sl.unscaledBody = bodies::createBodyFromShape(shape);
                         bodies_.push_back(sl);

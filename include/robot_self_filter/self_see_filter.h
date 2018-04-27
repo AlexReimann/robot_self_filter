@@ -114,7 +114,7 @@ namespace filters
             }
           }
         }
-        sm_ = new robot_self_filter::SelfMask<T> (tf_, links);
+        sm_ = new robot_self_filter::SelfMask<T> (tf_, links, nh);
 //        nh_.param<std::string> ("annotate", annotate_, std::string ());
 //        if (!annotate_.empty ())
 //          ROS_INFO ("Self filter is adding annotation channel '%s'", annotate_.c_str ());

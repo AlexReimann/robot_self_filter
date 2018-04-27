@@ -51,12 +51,12 @@
       self_filter_->getSelfMask()->getLinkNames(frames);
       if (frames.empty())
       {
-        ROS_DEBUG ("No valid frames have been passed into the self filter. Using a callback that will just forward scans on.");
+        ROS_INFO ("No valid frames have been passed into the self filter. Using a callback that will just forward scans on.");
         no_filter_sub_ = nh_.subscribe<sensor_msgs::PointCloud2> ("cloud_in", 1, boost::bind(&SelfFilter::noFilterCallback, this, _1));
       }
       else
       {
-        ROS_DEBUG ("Valid frames were passed in. We'll filter them.");
+        ROS_INFO ("Valid frames were passed in. We'll filter them.");
         mn_->setTargetFrames (frames);
         mn_->registerCallback (boost::bind (&SelfFilter::cloudCallback, this, _1));
       }
