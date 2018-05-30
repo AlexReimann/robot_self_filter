@@ -40,6 +40,8 @@
     {
       pnh_.param<std::string> ("sensor_frame", sensor_frame_, std::string ());
       pnh_.param<double> ("subsample_value", subsample_param_, 0.0);
+      
+      ROS_INFO("Self Filter using sensor_frame %s and subsample_value %f", sensor_frame_.c_str(), subsample_param_);
       self_filter_ = new filters::SelfFilter<pcl::PointCloud<pcl::PointXYZI> > (pnh_);
 
       sub_ = new message_filters::Subscriber<sensor_msgs::PointCloud2> (nh_, "cloud_in", 10);	
@@ -51,7 +53,7 @@
       self_filter_->getSelfMask()->getLinkNames(frames);
       if (frames.empty())
       {
-        ROS_INFO ("No valid frames have been passed into the self filter. Using a callback that will just forward scans on.");
+        ROS_WARN ("No valid frames have been passed into the self filter. Using a callback that will just forward scans on.");
         no_filter_sub_ = nh_.subscribe<sensor_msgs::PointCloud2> ("cloud_in", 1, boost::bind(&SelfFilter::noFilterCallback, this, _1));
       }
       else
@@ -102,7 +104,7 @@
 
       //double sec = (ros::WallTime::now() - tm).toSec ();
 
-      ROS_DEBUG ("Self filter: reduced %d points to %d points in %f seconds", (int)cloud->points.size(), (int)cloud_filtered->points.size (), (ros::WallTime::now() - tm).toSec ());
+      ROS_INFO ("Self filter: reduced %d points to %d points in %f seconds", (int)cloud->points.size(), (int)cloud_filtered->points.size (), (ros::WallTime::now() - tm).toSec ());
 
       sensor_msgs::PointCloud2Ptr cloud2_out = boost::make_shared<sensor_msgs::PointCloud2>();
       pcl::toROSMsg(*cloud_filtered, *cloud2_out);

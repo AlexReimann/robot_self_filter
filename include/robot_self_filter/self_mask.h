@@ -210,10 +210,13 @@ namespace robot_self_filter
             else
             {
                 assumeFrame(data_in.header.frame_id, pcl_conversions::fromPCL(data_in.header).stamp, sensor_frame, min_sensor_dist);
-                if (sensor_frame.empty())
+                if (sensor_frame.empty()){
+                    ROS_INFO("MaskAuxCont");
                     maskAuxContainment(data_in, mask);
-                else
+                }else{
+                    ROS_INFO("MaskAuxIntersect");
                     maskAuxIntersection(data_in, mask, callback);
+                }
             }
         };
         
@@ -333,10 +336,13 @@ namespace robot_self_filter
         /** \brief Get the intersection mask (INSIDE, OUTSIDE or
          *            SHADOW) value for an individual point. No setup is
          *            performed, assumeFrame() should be called before use */
+        /*
         int getMaskIntersection (double x, double y, double z, const boost::function<void(const Eigen::Vector3d&)> &callback = NULL) const
         {
             return getMaskContainment(Eigen::Vector3d(x, y, z));
         };
+        /*
+
         /** \brief Get the intersection mask (INSIDE, OUTSIDE or
          *            SHADOW) value for an individual point. No setup is
          *            performed, assumeFrame() should be called before use */
@@ -560,11 +566,19 @@ namespace robot_self_filter
             bodies::BoundingSphere bound;
             bodies::mergeBoundingSpheres(bspheres_, bound);	  
             tfScalar radiusSquared = bound.radius * bound.radius;
+
+            std::cout << "\nsensorpos:\n" << sensor_pos_ << "\n";
             
             //std::cout << "Testing " << np << " points\n";
+
+            //ROS_INFO("maskAuxInters");
             
             // we now decide which points we keep
             //#pragma omp parallel for schedule(dynamic) 
+
+            int shadow_count_inner = 0;
+            int shadow_count_outer = 0;
+
             for (int i = 0 ; i < (int)np ; ++i)
             {
                 bool print = false;
@@ -588,20 +602,27 @@ namespace robot_self_filter
                         {
                             // we check it the point is a shadow point 
                             Eigen::Vector3d dir(sensor_pos_ - pt);
+
+                            //Eigen::Vector3d dir(pt - sensor_pos_);
                             tfScalar  lng = dir.norm();
-                            if (lng < min_sensor_dist_) 
-                            {
-                                out = INSIDE;
+                            //if (lng < min_sensor_dist_)
+                            //{
+                            //    out = INSIDE;
                                 //std::cout << "Point " << i << " less than min sensor distance away\n";
-                            }
-                            else
+                            //}
+                            //else
                             {		
                                 dir /= lng;
                                 EigenSTL::vector_Vector3d intersections;
                                 for (unsigned int j = 0 ; out == OUTSIDE && j < bs ; ++j) 
                                 {
-                                    if (bodies_[j].body->intersectsRay(pt, dir, &intersections, 1))
+
+                                    if (bodies_[j].unscaledBody->intersectsRay(pt, dir, &intersections, 1))
+                                    //if (bodies_[j].unscaledBody->intersectsRay(sensor_pos_, dir, &intersections, 1))
                                     {
+                                        out = SHADOW;
+                                        shadow_count_inner++;
+                                        /*
                                         if (dir.dot(sensor_pos_ - intersections[0]) >= 0.0)
                                         {
                                             if (callback)
@@ -609,6 +630,7 @@ namespace robot_self_filter
                                             out = SHADOW;
                                             if(print) std::cout << "Point " << i << " shadowed by body part " << bodies_[j].name << std::endl;
                                         }
+                                        */
                                     }
                                 }
                                 // if it is not a shadow point, we check if it is inside the scaled body
@@ -622,8 +644,13 @@ namespace robot_self_filter
                                         }
                             }
                         }
+
+                        if (out == SHADOW)
+                            shadow_count_outer++;
                         mask[i] = out;
             }
+
+            ROS_INFO("shadow count inner: %d outer: %d", shadow_count_inner, shadow_count_outer);
         };
         
         tf::TransformListener               &tf_;

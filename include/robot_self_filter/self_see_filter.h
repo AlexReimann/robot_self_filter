@@ -170,10 +170,12 @@ namespace filters
         if (sensor_frame_.empty ()) 
         {
           sm_->maskContainment (data_in, keep);
+          ROS_INFO("mask_con");
         } 
         else 
         {
           sm_->maskIntersection (data_in, sensor_frame_, min_sensor_dist_, keep);
+          ROS_INFO("mask_int");
         }	
         fillResult (data_in, keep, data_out);
         return (true);
