@@ -419,8 +419,10 @@ namespace robot_self_filter
             //std::string robot_description_param_name;
             //nh_.param("robot_description_param_name", robot_description_param_name, std::string("robot_description"));
             //ROS_INFO("Using robot_description param name: %s", (nh_.getNamespace() + robot_description_param_name).c_str());
-            
-            if (nh_.getParam("/robot_description", content))
+
+            std::string param_key;
+
+            if (nh_.getParam("/robot_description", content) || (nh_.searchParam("robot_description", param_key) && nh_.getParam(param_key, content)))
             {
                 urdfModel = boost::shared_ptr<urdf::Model>(new urdf::Model());
                 if (!urdfModel->initString(content))
