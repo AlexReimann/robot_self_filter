@@ -67,7 +67,7 @@
 
 namespace robot_self_filter
 {   
-    static inline Eigen::Affine3d urdfPose2EigenTransform(const urdf::Pose &pose)
+    static inline Eigen::Isometry3d urdfPose2EigenTransform(const urdf::Pose &pose)
     {
         return Eigen::Translation3d(pose.position.x, pose.position.y, pose.position.z) * Eigen::Quaterniond(pose.rotation.x, pose.rotation.y, pose.rotation.z, pose.rotation.w);
     }
@@ -148,7 +148,7 @@ namespace robot_self_filter
             std::string   name;
             bodies::Body *body;
             bodies::Body *unscaledBody;
-            Eigen::Affine3d constTransf;
+            Eigen::Isometry3d constTransf;
             double        volume;
         };
         
@@ -253,7 +253,7 @@ namespace robot_self_filter
                 
                 // find the transform between the link's frame and the pointcloud frame
                 tf::StampedTransform transf;
-                Eigen::Affine3d transf_eigen;
+                Eigen::Isometry3d transf_eigen;
                 try
                 {
                     tf_.lookupTransform(frame_id, bodies_[i].name, stamp, transf);
