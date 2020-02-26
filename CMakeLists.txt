@@ -70,6 +70,11 @@ add_executable(self_filter src/self_filter_node.cpp ${HEADERS})
 target_link_libraries(self_filter ${PROJECT_NAME})
 add_dependencies(self_filter ${catkin_EXPORTED_TARGETS} )
 
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE
+)
 
 install(TARGETS ${PROJECT_NAME} self_filter
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
