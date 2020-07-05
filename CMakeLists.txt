@@ -1,10 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(robot_self_filter)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-
 find_package(catkin REQUIRED COMPONENTS cmake_modules roscpp tf tf_conversions filters sensor_msgs visualization_msgs geometric_shapes urdf resource_retriever pcl_conversions  shape_msgs nodelet )
-find_package(Boost REQUIRED COMPONENTS signals)
+find_package(Boost REQUIRED)
 find_package(PCL REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(OpenMP REQUIRED)
