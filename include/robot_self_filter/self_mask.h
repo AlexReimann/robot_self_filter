@@ -122,6 +122,7 @@ namespace robot_self_filter
         INSIDE = 0,
         OUTSIDE = 1,
         SHADOW = 2,
+        INVALID =3
     };
     
     struct LinkInfo
@@ -542,6 +543,11 @@ namespace robot_self_filter
             for (int i = 0 ; i < (int)np ; ++i)
             {
                 Eigen::Vector3d pt = Eigen::Vector3d(data_in.points[i].x, data_in.points[i].y, data_in.points[i].z);
+                if (pt.hasNaN()) {
+                  mask[i] = INVALID;
+                  continue;
+                }
+
                 int out = OUTSIDE;
                 if ((bound.center - pt).squaredNorm() < radiusSquared)
                     for (unsigned int j = 0 ; out == OUTSIDE && j < bs ; ++j)
@@ -573,6 +579,10 @@ namespace robot_self_filter
                 //if(i%100 == 0) print = true;
                 Eigen::Vector3d pt = Eigen::Vector3d(data_in.points[i].x, data_in.points[i].y, data_in.points[i].z);
                 int out = OUTSIDE;
+                if (pt.hasNaN()) {
+                  mask[i] = INVALID;
+                  continue;
+                }
                 
                 // we first check is the point is in the unscaled body. 
                 // if it is, the point is definitely inside
