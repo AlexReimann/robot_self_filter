@@ -150,7 +150,12 @@ namespace filters
       }
 
       bool updateWithSensorFrameAndMask
-        (const T& data_in, T& data_out, const std::string& sensor_frame, std::vector<int>& keep = std::vector<int>())
+        (const T& data_in, T& data_out, const std::string& sensor_frame)
+      {
+        return updateWithSensorFrameAndMask(data_in, data_out, std::vector<int>());
+      }
+      bool updateWithSensorFrameAndMask
+        (const T& data_in, T& data_out, const std::string& sensor_frame, std::vector<int>& keep)
       {
         sensor_frame_ = sensor_frame;
         return (updateWithMask (data_in, data_out, keep));
@@ -161,7 +166,13 @@ namespace filters
        * \param data_out T array with length width
        */
       bool
-        updateWithMask (const T& data_in, T& data_out, std::vector<int>& keep = std::vector<int>())
+        updateWithMask (const T& data_in, T& data_out)
+      {
+        return updateWithMask(data_in, data_out, std::vector<int>());
+      }
+
+      bool
+        updateWithMask (const T& data_in, T& data_out, std::vector<int>& keep)
       {
         //std::vector<int> keep (data_in.points.size ());
         keep.clear();
